@@ -32,5 +32,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "gitpkg": "^1.0.0-beta.2"
+  }
 }
