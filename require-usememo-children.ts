@@ -58,7 +58,7 @@ const rule: Rule.RuleModule = {
           }
           if (child.type === "JSXExpressionContainer") {
             const { expression } = child;
-            if (expression.type !== "JSXEmptyExpression") {
+            if (expression?.type !== "JSXEmptyExpression") {
               switch (getExpressionMemoStatus(context, expression)) {
                 case MemoStatus.UnmemoizedObject:
                   report(node, "object-usememo-children");

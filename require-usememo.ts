@@ -77,7 +77,7 @@ const rule: Rule.RuleModule = {
         if (!isComplexComponent(parent)) return;
         if (value.type === "JSXExpressionContainer") {
           const { expression } = value;
-          if (expression.type !== "JSXEmptyExpression") {
+          if (expression?.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
               case MemoStatus.UnmemoizedObject:
                 report(node, "object-usememo-props");

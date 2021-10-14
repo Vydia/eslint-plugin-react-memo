@@ -26,7 +26,9 @@
     "test": "jest",
     "build": "rm -rf dist && rollup -c",
     "prepublish:public": "npm run build && npm run bump-version",
-    "publish:public": "npm publish --access public"
+    "publish:public": "npm publish --access public",
+    "deploy": "yarn build && yarn publish-git",
+    "publish-git": "gitpkg publish"
   },
   "files": [
     "dist"
