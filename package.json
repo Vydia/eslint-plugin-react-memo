@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-react-memo",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "dist/index.js",
   "author": "Stefano J. Attardi <github@attardi.org>",
