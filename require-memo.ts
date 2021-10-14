@@ -75,6 +75,7 @@ function checkFunction(
 
 const rule: Rule.RuleModule = {
   meta: {
+    fixable: 'code',
     messages: {
       "memo-required": "Component definition not wrapped in React.memo()",
     },
