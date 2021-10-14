@@ -28,7 +28,8 @@
     "prepublish:public": "npm run build && npm run bump-version",
     "publish:public": "npm publish --access public",
     "deploy": "yarn build && yarn publish-git",
-    "publish-git": "gitpkg publish"
+    "publish-git": "gitpkg publish",
+    "version-bump": "npm version patch && git add * && git commit -m \"version-bump\" && git push"
   },
   "files": [
     "dist"
