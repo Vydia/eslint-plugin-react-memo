@@ -30,6 +30,7 @@ const messages = {
 const rule: Rule.RuleModule = {
   meta: {
     messages,
+    fixable: 'code',
     schema: [
       {
         type: "object",

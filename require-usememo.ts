@@ -55,6 +55,7 @@ const messages = {
 
 const rule: Rule.RuleModule = {
   meta: {
+    fixable: 'code',
     messages,
     schema: [
       {
