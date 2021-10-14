@@ -47,7 +47,14 @@ function checkFunction(
     const { id } = currentNode;
     if (id.type === "Identifier") {
       if (componentNameRegex.test(id.name)) {
-        context.report({ node, messageId: "memo-required" });
+        context.report({ node, messageId: "memo-required", fix: (fixer): Rule.Fix => {
+          let scope = node.parent;
+
+          // const sourceCode = context.getSourceCode()
+          // let fixedCode = sourceCode.getText(undefined) + ' === null';
+
+          return fixer.replaceText(scope, '');
+      } });
       }
     }
   } else if (
