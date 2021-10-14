@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-react-memo",
-  "version": "0.2.0",
+  "version": "0.0.7",
   "description": "",
   "main": "dist/index.js",
   "author": "Stefano J. Attardi <github@attardi.org>",
@@ -29,9 +29,7 @@
     "publish:public": "npm publish --access public",
     "deploy": "yarn build && yarn publish-git",
     "publish-git": "gitpkg publish",
-    "version": "",
-    "postversion": "git push && git push --tags",
-    "version-bump": "npm version minor --force -m \"bump version\""
+    "version-bump": "npm version patch && git add . && git commit --allow-empty -m \"version-bump\" && git push"
   },
   "files": [
     "dist"
