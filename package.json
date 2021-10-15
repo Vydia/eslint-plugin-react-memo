@@ -27,10 +27,14 @@
     "test": "jest",
     "test-watch": "jest --watch",
     "build": "rm -rf dist && rollup -c",
+    "build-and-watch": "rm -rf dist && rollup -c --watch",
     "prepublish:public": "npm run build && npm run bump-version",
     "publish:public": "npm publish --access public",
     "deploy": "yarn build && yarn publish-git",
     "publish-git": "yarn version-bump && gitpkg publish",
+    "link-to-web": "cd ../web && yarn link-eslint-plugin-react-memo-auto && cd ../eslint-plugin-react-memo && yarn build-and-watch",
+    "link-prepare": "yarn install && yarn link && echo 'Now run \"yarn link-eslint-plugin-react-memo\" in mobile and web. And make sure you are running \"yarn build-and-watch\" to keep those dist folders available.'",
+    "unlink-prepare": "yarn install && yarn unlink && echo 'Now run \"yarn unlink-eslint-plugin-react-memo\" in mobile and web. And make sure you are running \"yarn build-and-watch\" to keep those dist folders available.'",
     "version-bump": "npm version patch && git add . && git commit --allow-empty -m \"version-bump\""
   },
   "files": [
