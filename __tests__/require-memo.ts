@@ -1,5 +1,6 @@
 import { RuleTester } from "eslint";
 import rule from "../require-memo";
+import { normalizeIndent } from '../utils';
 
 const ruleTester = new RuleTester({
   parser: require.resolve("@typescript-eslint/parser"),
@@ -7,13 +8,6 @@ const ruleTester = new RuleTester({
     ecmaFeatures: { jsx: true },
   },
 });
-
-function normalizeIndent(strings: TemplateStringsArray) {
-  const codeLines = strings[0].split('\n');
-  const match = codeLines[1].match(/\s+/);
-  const leftPadding = match ? match[0].length : 0;
-  return codeLines.map(line => line.substr(leftPadding)).join('\n');
-}
 
 ruleTester.run("memo", rule, {
   valid: [
@@ -104,6 +98,7 @@ ruleTester.run("memo", rule, {
         const Component = React.memo(useRef(() => <div />))
       `
     },
+    // TODO: setup autofixer for these
     {
       code: normalizeIndent`
         const Component = function Component() { return <div />; }
@@ -113,6 +108,7 @@ ruleTester.run("memo", rule, {
         const Component = function Component() { return <div />; }
       `
     },
+    // TODO: setup autofixer for these
     {
       code: normalizeIndent`
         const Component = useRef(function() { return <div />; })
@@ -122,6 +118,7 @@ ruleTester.run("memo", rule, {
         const Component = useRef(function() { return <div />; })
       `
     },
+    // TODO: setup autofixer for these
     {
       code: normalizeIndent`
         function Component() { return <div />; }
