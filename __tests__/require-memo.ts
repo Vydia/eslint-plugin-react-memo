@@ -101,7 +101,7 @@ ruleTester.run("memo", rule, {
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
-        const Component = memo(useRef(() => <div />))
+        const Component = React.memo(useRef(() => <div />))
       `
     },
     {

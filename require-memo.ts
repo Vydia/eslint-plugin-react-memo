@@ -25,6 +25,14 @@ function isMemoCallExpression(node: Rule.Node) {
   return false;
 }
 
+// context.report({ node, messageId: "memo-required", fix: (fixer): Rule.Fix => {
+//   let scope = node.body
+//   const sourceCode = context.getSourceCode();
+//   let fixedCode = `memo(${sourceCode.getText(scope)})`
+
+//   return fixer.replaceText(scope, fixedCode);
+// } });
+
 function checkFunction(
   context: Rule.RuleContext,
   node: (
@@ -47,6 +55,22 @@ function checkFunction(
     const { id } = currentNode;
     if (id.type === "Identifier") {
       if (componentNameRegex.test(id.name)) {
+        if (node.type === 'ArrowFunctionExpression') {
+          context.report({ node, messageId: "memo-required", fix: (fixer): Rule.Fix => {
+            const parent = node.parent
+            let scope
+            if (parent.type === 'VariableDeclarator') {
+              scope = node
+            } else {
+              scope = parent
+            }
+            const sourceCode = context.getSourceCode();
+            let fixedCode = `React.memo(${sourceCode.getText(scope)})`
+
+            return fixer.replaceText(scope, fixedCode);
+          } });
+          return
+        }
         context.report({ node, messageId: "memo-required" });
       }
     }
