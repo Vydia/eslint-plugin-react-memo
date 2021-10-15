@@ -8,75 +8,133 @@ const ruleTester = new RuleTester({
   },
 });
 
+function normalizeIndent(strings: TemplateStringsArray) {
+  const codeLines = strings[0].split('\n');
+  const match = codeLines[1].match(/\s+/);
+  const leftPadding = match ? match[0].length : 0;
+  return codeLines.map(line => line.substr(leftPadding)).join('\n');
+}
+
 ruleTester.run("memo", rule, {
   valid: [
     {
-      code: `const Component = React.memo(() => <div />)`,
+      code: normalizeIndent`
+        const Component = React.memo(() => <div />)
+      `,
     },
     {
-      code: `const Component = memo(() => <div />)`,
+      code: normalizeIndent`
+        const Component = memo(() => <div />)
+      `,
     },
     {
-      code: `const Component = memo(useRef(() => <div />))`,
+      code: normalizeIndent`
+        const Component = memo(useRef(() => <div />))
+      `,
     },
     {
-      code: `const Component = React.useRef(React.memo(() => <div />))`,
+      code: normalizeIndent`
+        const Component = React.useRef(React.memo(() => <div />))
+      `,
     },
     {
-      code: `const myFunction = () => <div />`,
+      code: normalizeIndent`
+        const myFunction = () => <div />
+      `,
     },
     {
-      code: `const myFunction = wrapper(() => <div />)`,
+      code: normalizeIndent`
+        const myFunction = wrapper(() => <div />)
+      `,
     },
     {
-      code: `const Component = React.memo(function() { return <div />; });`,
+      code: normalizeIndent`
+        const Component = React.memo(function() { return <div />; });
+      `,
     },
     {
-      code: `const Component = memo(function Component() { return <div />; });`,
+      code: normalizeIndent`
+        const Component = memo(function Component() { return <div />; });
+      `,
     },
     {
-      code: `const myFunction = () => <div />`,
+      code: normalizeIndent`
+        const myFunction = () => <div />
+      `,
     },
     {
-      code: `const myFunction = wrapper(() => <div />)`,
+      code: normalizeIndent`
+        const myFunction = wrapper(() => <div />)
+      `,
     },
     {
-      code: `function myFunction() { return <div />; }`,
+      code: normalizeIndent`
+        function myFunction() { return <div />; }
+      `,
     },
     {
-      code: `const myFunction = wrapper(function() { return <div /> })`,
+      code: normalizeIndent`
+        const myFunction = wrapper(function() { return <div /> })
+      `,
     },
     {
       filename: "dir/myFunction.js",
       parserOptions: { ecmaVersion: 6, sourceType: "module" },
-      code: `export default function() { return <div /> };`,
+      code: normalizeIndent`
+        export default function() { return <div /> };
+      `,
     },
   ],
   invalid: [
     {
-      code: `const Component = () => <div />`,
+      code: normalizeIndent`
+        const Component = () => <div />
+      `,
       errors: [{ messageId: "memo-required" }],
+      output: normalizeIndent`
+        const Component = React.memo(() => <div />)
+      `
     },
     {
-      code: `const Component = useRef(() => <div />)`,
+      code: normalizeIndent`
+        const Component = useRef(() => <div />)
+      `,
       errors: [{ messageId: "memo-required" }],
+      output: normalizeIndent`
+        const Component = memo(useRef(() => <div />))
+      `
     },
     {
-      code: `const Component = function Component() { return <div />; }`,
+      code: normalizeIndent`
+        const Component = function Component() { return <div />; }
+      `,
       errors: [{ messageId: "memo-required" }],
+      output: normalizeIndent`
+        const Component = function Component() { return <div />; }
+      `
     },
     {
-      code: `const Component = useRef(function() { return <div />; })`,
+      code: normalizeIndent`
+        const Component = useRef(function() { return <div />; })
+      `,
       errors: [{ messageId: "memo-required" }],
+      output: normalizeIndent`
+        const Component = useRef(function() { return <div />; })
+      `
     },
     {
-      code: `function Component() { return <div />; }`,
+      code: normalizeIndent`
+        function Component() { return <div />; }
+      `,
       errors: [{ messageId: "memo-required" }],
+      output: normalizeIndent`
+        function Component() { return <div />; }
+      `
     },
     // {
     //   filename: "dir/Component.js",
     //   parserOptions: { ecmaVersion: 6, sourceType: "module" },
-    //   code: `export default function() { return <div /> };`,
+    //   code: export default function() { return <div /> };,
     //   errors: [{ messageId: "memo-required" }],
     // },
   ],
