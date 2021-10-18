@@ -2,6 +2,7 @@ import { Rule } from "eslint";
 import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
 import { Node } from "@typescript-eslint/types/dist/ast-spec"
+import { isArrowFn } from "./utils";
 
 import {
   getExpressionMemoStatus,
@@ -72,15 +73,32 @@ const rule: Rule.RuleModule = {
       context.report({ node, messageId: messageId as string });
     }
 
-    const fix = (fixer: Rule.RuleFixer, implicitReturn: boolean = true): Rule.Fix | null => {
+    const useMemoFix = (fixer: Rule.RuleFixer, implicitReturn: boolean = true): Rule.Fix | null => {
       const sourceCode = context.getSourceCode();
       const references = context.getScope()?.references
       const filteredRefs = references?.filter((reference) => reference?.writeExpr)
       // @ts-ignore
       const definition = filteredRefs?.[0]?.writeExpr?.parent
       if (!definition) return null
-      const [name, value] = sourceCode.getText(definition).split('=')
+      const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
       const fixedCode = `${name.trim()} = useMemo(() => ${implicitReturn ? value.trim() : `(${value.trim()})`}, [])`
+      return fixer.replaceText(definition, fixedCode)
+    }
+
+    const useCallbackFix = (fixer: Rule.RuleFixer): Rule.Fix | null => {
+      let fixedCode = ''
+      const sourceCode = context.getSourceCode();
+      const references = context.getScope()?.references
+      const filteredRefs = references?.filter((reference) => reference?.writeExpr)
+      // @ts-ignore
+      const definition = filteredRefs?.[0]?.writeExpr?.parent
+      if (!definition) return null
+      const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
+      if(isArrowFn(value)){
+        fixedCode = `${name.trim()} = useCallback(${value.trim()}, [])`
+      } else {
+        fixedCode = `${name.trim()} = useCallback(${value.replace(`function ${name.trim()}`, 'function').trim()}, [])`
+      }
       return fixer.replaceText(definition, fixedCode)
     }
 
@@ -95,16 +113,16 @@ const rule: Rule.RuleModule = {
           if (expression?.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
               case MemoStatus.UnmemoizedObject:
-                context.report({ node, messageId: "object-usememo-props", fix: (fixer) => fix(fixer, false) });
+                context.report({ node, messageId: "object-usememo-props", fix: (fixer) => useMemoFix(fixer, false) });
                 break;
               case MemoStatus.UnmemoizedArray:
-                context.report({ node, messageId: "array-usememo-props", fix });
+                context.report({ node, messageId: "array-usememo-props", fix: (fixer) => useMemoFix(fixer) });
                 break;
               case MemoStatus.UnmemoizedNew:
-                context.report({ node, messageId: "instance-usememo-props", fix });
+                context.report({ node, messageId: "instance-usememo-props", fix: (fixer) => useMemoFix(fixer) });
                 break;
               case MemoStatus.UnmemoizedFunction:
-                report(node, "function-usecallback-props");
+                context.report({ node, messageId: "function-usecallback-props", fix: useCallbackFix });
                 break;
               case MemoStatus.UnmemoizedFunctionCall:
               case MemoStatus.UnmemoizedOther:

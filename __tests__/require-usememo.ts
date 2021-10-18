@@ -133,7 +133,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "instance-usememo-props" }],
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -151,7 +151,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "usememo-const" }],
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -165,7 +165,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "object-usememo-props" }],
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -179,7 +179,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "array-usememo-props" }],
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -196,7 +196,7 @@ ruleTester.run("useMemo", rule, {
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -213,7 +213,7 @@ ruleTester.run("useMemo", rule, {
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -231,7 +231,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "array-usememo-deps" }],
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {

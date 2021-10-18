@@ -4,3 +4,5 @@ export function normalizeIndent(strings: TemplateStringsArray) {
   const leftPadding = match ? match[0].length : 0;
   return codeLines.map(line => line.substr(leftPadding)).join('\n');
 }
+
+export function isArrowFn(fn: string) { return /^[^{]+?=>/.test(fn.toString()); };

@@ -98,7 +98,7 @@ ruleTester.run("memo", rule, {
         const Component = memo(useRef(() => <div />))
       `
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = function Component() { return <div />; }
@@ -108,7 +108,7 @@ ruleTester.run("memo", rule, {
         const Component = function Component() { return <div />; }
       `
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = useRef(function() { return <div />; })
@@ -118,7 +118,7 @@ ruleTester.run("memo", rule, {
         const Component = useRef(function() { return <div />; })
       `
     },
-    // TODO: setup autofixer for the following spec (output currently matches code)
+    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         function Component() { return <div />; }
