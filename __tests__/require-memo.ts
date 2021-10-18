@@ -13,7 +13,7 @@ ruleTester.run("memo", rule, {
   valid: [
     {
       code: normalizeIndent`
-        const Component = React.memo(() => <div />)
+        const Component = memo(() => <div />)
       `,
     },
     {
@@ -28,7 +28,7 @@ ruleTester.run("memo", rule, {
     },
     {
       code: normalizeIndent`
-        const Component = React.useRef(React.memo(() => <div />))
+        const Component = useRef(memo(() => <div />))
       `,
     },
     {
@@ -43,7 +43,7 @@ ruleTester.run("memo", rule, {
     },
     {
       code: normalizeIndent`
-        const Component = React.memo(function() { return <div />; });
+        const Component = memo(function() { return <div />; });
       `,
     },
     {
@@ -86,7 +86,7 @@ ruleTester.run("memo", rule, {
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
-        const Component = React.memo(() => <div />)
+        const Component = memo(() => <div />)
       `
     },
     {
@@ -95,10 +95,10 @@ ruleTester.run("memo", rule, {
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
-        const Component = React.memo(useRef(() => <div />))
+        const Component = memo(useRef(() => <div />))
       `
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = function Component() { return <div />; }
@@ -108,7 +108,7 @@ ruleTester.run("memo", rule, {
         const Component = function Component() { return <div />; }
       `
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = useRef(function() { return <div />; })
@@ -118,7 +118,7 @@ ruleTester.run("memo", rule, {
         const Component = useRef(function() { return <div />; })
       `
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         function Component() { return <div />; }

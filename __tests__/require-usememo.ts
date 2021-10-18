@@ -14,7 +14,7 @@ ruleTester.run("useMemo", rule, {
     {
       code: normalizeIndent`
         const Component = () => {
-          const myObject = React.useMemo(() => ({}), []);
+          const myObject = useMemo(() => ({}), []);
           return <Child prop={myObject} />;
         }
       `,
@@ -30,7 +30,7 @@ ruleTester.run("useMemo", rule, {
     {
       code: normalizeIndent`
         const Component = () => {
-          const myArray = React.useMemo(() => new Object(), []);
+          const myArray = useMemo(() => new Object(), []);
           return <Child prop={myArray} />;
         }
       `,
@@ -97,7 +97,7 @@ ruleTester.run("useMemo", rule, {
       `,
       output: normalizeIndent`
         const Component = () => {
-          const myObject = React.useMemo(() => ({}), []);
+          const myObject = useMemo(() => ({}), []);
           return <Child prop={myObject} />;
         }
       `,
@@ -127,13 +127,13 @@ ruleTester.run("useMemo", rule, {
       `,
       output: normalizeIndent`
         const Component = () => {
-          const myInstance = React.useMemo(() => new Object(), []);
+          const myInstance = useMemo(() => new Object(), []);
           return <Child prop={myInstance} />;
         }
       `,
       errors: [{ messageId: "instance-usememo-props" }],
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -151,7 +151,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "usememo-const" }],
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -165,7 +165,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "object-usememo-props" }],
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -179,7 +179,7 @@ ruleTester.run("useMemo", rule, {
       `,
       errors: [{ messageId: "array-usememo-props" }],
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -196,7 +196,7 @@ ruleTester.run("useMemo", rule, {
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
@@ -213,25 +213,25 @@ ruleTester.run("useMemo", rule, {
       options: [{ strict: true }],
       errors: [{ messageId: "unknown-usememo-props" }],
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {
           const myArray1 = [];
-          const myArray2 = React.useMemo(() => myArray1, [myArray1]);
+          const myArray2 = useMemo(() => myArray1, [myArray1]);
           return <Child prop={myArray2} />;
         }
       `,
       output: normalizeIndent`
         const Component = () => {
           const myArray1 = [];
-          const myArray2 = React.useMemo(() => myArray1, [myArray1]);
+          const myArray2 = useMemo(() => myArray1, [myArray1]);
           return <Child prop={myArray2} />;
         }
       `,
       errors: [{ messageId: "array-usememo-deps" }],
     },
-    // TODO: setup autofixer for these
+    // TODO: setup autofixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = () => {

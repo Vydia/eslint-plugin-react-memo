@@ -12,7 +12,7 @@ ruleTester.run("useCallback", rule, {
   valid: [
     {
       code: `const Component = () => {
-      const myFn = React.useCallback(function() {}, []);
+      const myFn = useCallback(function() {}, []);
       return <Child prop={myFn} />;
     }`,
     },
@@ -44,7 +44,7 @@ ruleTester.run("useCallback", rule, {
     {
       code: `const Component = () => {
       const myFn1 = useCallback(() => [], []);
-      const myFn2 = React.useCallback(() => myFn1, [myFn1]);
+      const myFn2 = useCallback(() => myFn1, [myFn1]);
       return <Child prop={myFn2} />;
       }`,
     },
@@ -115,7 +115,7 @@ ruleTester.run("useCallback", rule, {
     {
       code: `const Component = () => {
         const myFn1 = () => [];
-        const myFn2 = React.useCallback(() => myFn1, [myFn1]);
+        const myFn2 = useCallback(() => myFn1, [myFn1]);
         return <Child prop={myFn2} />;
       }`,
       errors: [{ messageId: "function-usecallback-deps" }],

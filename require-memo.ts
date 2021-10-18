@@ -25,13 +25,152 @@ function isMemoCallExpression(node: Rule.Node) {
   return false;
 }
 
-// context.report({ node, messageId: "memo-required", fix: (fixer): Rule.Fix => {
-//   let scope = node.body
-//   const sourceCode = context.getSourceCode();
-//   let fixedCode = `memo(${sourceCode.getText(scope)})`
 
-//   return fixer.replaceText(scope, fixedCode);
-// } });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function checkFunction(
   context: Rule.RuleContext,
@@ -65,7 +204,7 @@ function checkFunction(
               scope = parent
             }
             const sourceCode = context.getSourceCode();
-            let fixedCode = `React.memo(${sourceCode.getText(scope)})`
+            let fixedCode = `memo(${sourceCode.getText(scope)})`
 
             return fixer.replaceText(scope, fixedCode);
           } });
