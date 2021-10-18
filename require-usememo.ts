@@ -1,6 +1,8 @@
 import { Rule } from "eslint";
 import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
+import { Node } from "@typescript-eslint/types/dist/ast-spec"
+
 import {
   getExpressionMemoStatus,
   isComplexComponent,
@@ -70,8 +72,20 @@ const rule: Rule.RuleModule = {
       context.report({ node, messageId: messageId as string });
     }
 
+    const fix = (fixer: Rule.RuleFixer, implicitReturn: boolean = true): Rule.Fix | null => {
+      const sourceCode = context.getSourceCode();
+      const references = context.getScope()?.references
+      const filteredRefs = references?.filter((reference) => reference?.writeExpr)
+      // @ts-ignore
+      const definition = filteredRefs?.[0]?.writeExpr?.parent
+      if (!definition) return null
+      const [name, value] = sourceCode.getText(definition).split('=')
+      const fixedCode = `${name.trim()} = useMemo(() => ${implicitReturn ? value.trim() : `(${value.trim()})`}, [])`
+      return fixer.replaceText(definition, fixedCode)
+    }
+
     return {
-      JSXAttribute: (node: ESTree.Node & Rule.NodeParentExtension) => {
+      JSXAttribute: (node: Rule.Node & Rule.NodeParentExtension) => {
         const { parent, value } = (node as unknown) as TSESTree.JSXAttribute &
           Rule.NodeParentExtension;
         if (value === null) return;
@@ -81,69 +95,13 @@ const rule: Rule.RuleModule = {
           if (expression?.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
               case MemoStatus.UnmemoizedObject:
-                // @ts-ignore
-                context.report({ node, messageId: "object-usememo-props", fix: (fixer): Rule.Fix => {
-                  const sourceCode = context.getSourceCode();
-                  // @ts-ignore
-                  const definition = context.getScope().references.filter((reference) => reference.writeExpr ? reference.writeExpr.properties : null)?.[0]?.writeExpr.parent
-                  // console.warn(definition)
-                  const [name, value] = sourceCode.getText(definition).split('=')
-                  let fixedCode = ''
-                  if(name && value) {
-                    fixedCode = `${name.trim()} = useMemo(() => (${value.trim()}), [])`
-                  }
-
-                  // return fixer.replaceText(scope, fixedCode);
-                  if(definition) {
-                    return fixer.replaceText(definition, fixedCode)
-                  } else {
-                    console.warn(context.getScope().references)
-                  }
-                } });
+                context.report({ node, messageId: "object-usememo-props", fix: (fixer) => fix(fixer, false) });
                 break;
               case MemoStatus.UnmemoizedArray:
-                // @ts-ignore
-                context.report({ node, messageId: "array-usememo-props", fix: (fixer): Rule.Fix => {
-                  const sourceCode = context.getSourceCode();
-                  // @ts-ignore
-                  const definition = context.getScope().references.filter((reference) => reference.writeExpr ? reference.writeExpr : null)?.[0]?.writeExpr.parent
-                  // console.warn(definition)
-                  const [name, value] = sourceCode.getText(definition).split('=')
-                  let fixedCode = ''
-                  if(name && value) {
-                    fixedCode = `${name.trim()} = useMemo(() => ${value.trim()}, [])`
-                  }
-
-                  // return fixer.replaceText(scope, fixedCode);
-                  if(definition) {
-                    return fixer.replaceText(definition, fixedCode)
-                  } else {
-                    // console.warn(context.getScope().references)
-                  }
-                } });
+                context.report({ node, messageId: "array-usememo-props", fix });
                 break;
               case MemoStatus.UnmemoizedNew:
-                // @ts-ignore
-                context.report({ node, messageId: "instance-usememo-props", fix: (fixer): Rule.Fix => {
-                  const sourceCode = context.getSourceCode();
-                  // @ts-ignore
-                  const definition = context.getScope().references.filter((reference) => reference.writeExpr ? reference.writeExpr : null)?.[0]?.writeExpr.parent
-                  // console.warn(definition)
-                  const [name, value] = sourceCode.getText(definition).split('=')
-                  let fixedCode = ''
-                  if(name && value) {
-                    fixedCode = `${name.trim()} = useMemo(() => ${value.trim()}, [])`
-                  }
-
-                  // return fixer.replaceText(scope, fixedCode);
-                  if(definition) {
-                    return fixer.replaceText(definition, fixedCode)
-                  } else {
-                    // @ts-ignore
-                    // console.warn(context.getScope().references.filter((reference) => reference.writeExpr ? reference.writeExpr : null)?.[0]?.writeExpr.parent)
-                    // console.warn(context.getScope().references)
-                  }
-                } });
+                context.report({ node, messageId: "instance-usememo-props", fix });
                 break;
               case MemoStatus.UnmemoizedFunction:
                 report(node, "function-usecallback-props");

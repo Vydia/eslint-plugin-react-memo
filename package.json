@@ -16,7 +16,7 @@
     "@types/jest": "^26.0.22",
     "@types/lodash": "^4.14.175",
     "@typescript-eslint/parser": "^4.19.0",
-    "@typescript-eslint/types": "^4.19.0",
+    "@typescript-eslint/types": "^5.0.0",
     "eslint": "^7.23.0",
     "gitpkg": "^1.0.0-beta.2",
     "jest": "^25.0.0",
@@ -41,5 +41,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "typescript-eslint": "^0.0.1-alpha.0"
+  }
 }
