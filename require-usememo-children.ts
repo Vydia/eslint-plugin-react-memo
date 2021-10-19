@@ -7,9 +7,6 @@ import {
   MemoStatus,
 } from "./common";
 
-const componentNameRegex = /^[^a-z]/;
-const hookNameRegex = /^use[A-Z0-9].*$/;
-
 const messages = {
   "object-usememo-children":
     "Object literal should be wrapped in React.useMemo() when used as children",

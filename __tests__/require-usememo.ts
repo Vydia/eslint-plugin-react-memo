@@ -95,12 +95,12 @@ ruleTester.run("useMemo", rule, {
           return <Child prop={myObject} />;
         }
       `,
-      output: normalizeIndent`
-        const Component = () => {
-          const myObject = useMemo(() => ({}), []);
-          return <Child prop={myObject} />;
-        }
-      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     const myObject = useMemo(() => ({}), []);
+      //     return <Child prop={myObject} />;
+      //   }
+      // `,
       errors: [{ messageId: "object-usememo-props" }],
     },
     {
@@ -110,12 +110,12 @@ ruleTester.run("useMemo", rule, {
           return <Child prop={myArray} />;
         }
       `,
-      output: normalizeIndent`
-        const Component = () => {
-          const myArray = useMemo(() => [], []);
-          return <Child prop={myArray} />;
-        }
-      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     const myArray = useMemo(() => [], []);
+      //     return <Child prop={myArray} />;
+      //   }
+      // `,
       errors: [{ messageId: "array-usememo-props" }],
     },
     {
@@ -125,128 +125,128 @@ ruleTester.run("useMemo", rule, {
           return <Child prop={myInstance} />;
         }
       `,
-      output: normalizeIndent`
-        const Component = () => {
-          const myInstance = useMemo(() => new Object(), []);
-          return <Child prop={myInstance} />;
-        }
-      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     const myInstance = useMemo(() => new Object(), []);
+      //     return <Child prop={myInstance} />;
+      //   }
+      // `,
       errors: [{ messageId: "instance-usememo-props" }],
     },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = () => {
-          let myObject = useMemo({});
-          myObject = {a: 'b'};
-          return <Child prop={myObject} />;
-        }
-      `,
-      output: normalizeIndent`
-        const Component = () => {
-          let myObject = useMemo({});
-          myObject = {a: 'b'};
-          return <Child prop={myObject} />;
-        }
-      `,
-      errors: [{ messageId: "usememo-const" }],
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = () => {
-          return <Child prop={{}} />;
-        }
-      `,
-      output: normalizeIndent`
-        const Component = () => {
-          return <Child prop={{}} />;
-        }
-      `,
-      errors: [{ messageId: "object-usememo-props" }],
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = () => {
-          return <Child prop={[]} />;
-        }
-      `,
-      output: normalizeIndent`
-        const Component = () => {
-          return <Child prop={[]} />;
-        }
-      `,
-      errors: [{ messageId: "array-usememo-props" }],
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = () => {
-          const myObject = memoize({});
-          return <Child prop={myObject} />;
-        }
-      `,
-      output: normalizeIndent`
-        const Component = () => {
-          const myObject = memoize({});
-          return <Child prop={myObject} />;
-        }
-      `,
-      options: [{ strict: true }],
-      errors: [{ messageId: "unknown-usememo-props" }],
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = () => {
-          const myArray = lodash.memoize([]);
-        return <Child prop={myArray} />;
-        }
-      `,
-      output: normalizeIndent`
-        const Component = () => {
-          const myArray = lodash.memoize([]);
-        return <Child prop={myArray} />;
-        }
-      `,
-      options: [{ strict: true }],
-      errors: [{ messageId: "unknown-usememo-props" }],
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = () => {
-          const myArray1 = [];
-          const myArray2 = useMemo(() => myArray1, [myArray1]);
-          return <Child prop={myArray2} />;
-        }
-      `,
-      output: normalizeIndent`
-        const Component = () => {
-          const myArray1 = [];
-          const myArray2 = useMemo(() => myArray1, [myArray1]);
-          return <Child prop={myArray2} />;
-        }
-      `,
-      errors: [{ messageId: "array-usememo-deps" }],
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = () => {
-          const myComplexString = css\`color: red;\`;
-          return <Child prop={myComplexString} />;
-        }
-      `,
-      output: normalizeIndent`
-        const Component = () => {
-          const myComplexString = css\`color: red;\`;
-          return <Child prop={myComplexString} />;
-        }
-      `,
-      options: [{ strict: true }],
-      errors: [{ messageId: "unknown-usememo-props" }],
-    },
+    // // TODO: setup fixer for the following spec (output currently matches code)
+    // {
+    //   code: normalizeIndent`
+    //     const Component = () => {
+    //       let myObject = useMemo({});
+    //       myObject = {a: 'b'};
+    //       return <Child prop={myObject} />;
+    //     }
+    //   `,
+    //   output: normalizeIndent`
+    //     const Component = () => {
+    //       let myObject = useMemo({});
+    //       myObject = {a: 'b'};
+    //       return <Child prop={myObject} />;
+    //     }
+    //   `,
+    //   errors: [{ messageId: "usememo-const" }],
+    // },
+    // // TODO: setup fixer for the following spec (output currently matches code)
+    // {
+    //   code: normalizeIndent`
+    //     const Component = () => {
+    //       return <Child prop={{}} />;
+    //     }
+    //   `,
+    //   output: normalizeIndent`
+    //     const Component = () => {
+    //       return <Child prop={{}} />;
+    //     }
+    //   `,
+    //   errors: [{ messageId: "object-usememo-props" }],
+    // },
+    // // TODO: setup fixer for the following spec (output currently matches code)
+    // {
+    //   code: normalizeIndent`
+    //     const Component = () => {
+    //       return <Child prop={[]} />;
+    //     }
+    //   `,
+    //   output: normalizeIndent`
+    //     const Component = () => {
+    //       return <Child prop={[]} />;
+    //     }
+    //   `,
+    //   errors: [{ messageId: "array-usememo-props" }],
+    // },
+    // // TODO: setup fixer for the following spec (output currently matches code)
+    // {
+    //   code: normalizeIndent`
+    //     const Component = () => {
+    //       const myObject = memoize({});
+    //       return <Child prop={myObject} />;
+    //     }
+    //   `,
+    //   output: normalizeIndent`
+    //     const Component = () => {
+    //       const myObject = memoize({});
+    //       return <Child prop={myObject} />;
+    //     }
+    //   `,
+    //   options: [{ strict: true }],
+    //   errors: [{ messageId: "unknown-usememo-props" }],
+    // },
+    // // TODO: setup fixer for the following spec (output currently matches code)
+    // {
+    //   code: normalizeIndent`
+    //     const Component = () => {
+    //       const myArray = lodash.memoize([]);
+    //     return <Child prop={myArray} />;
+    //     }
+    //   `,
+    //   output: normalizeIndent`
+    //     const Component = () => {
+    //       const myArray = lodash.memoize([]);
+    //     return <Child prop={myArray} />;
+    //     }
+    //   `,
+    //   options: [{ strict: true }],
+    //   errors: [{ messageId: "unknown-usememo-props" }],
+    // },
+    // // TODO: setup fixer for the following spec (output currently matches code)
+    // {
+    //   code: normalizeIndent`
+    //     const Component = () => {
+    //       const myArray1 = [];
+    //       const myArray2 = useMemo(() => myArray1, [myArray1]);
+    //       return <Child prop={myArray2} />;
+    //     }
+    //   `,
+    //   output: normalizeIndent`
+    //     const Component = () => {
+    //       const myArray1 = [];
+    //       const myArray2 = useMemo(() => myArray1, [myArray1]);
+    //       return <Child prop={myArray2} />;
+    //     }
+    //   `,
+    //   errors: [{ messageId: "array-usememo-deps" }],
+    // },
+    // // TODO: setup fixer for the following spec (output currently matches code)
+    // {
+    //   code: normalizeIndent`
+    //     const Component = () => {
+    //       const myComplexString = css\`color: red;\`;
+    //       return <Child prop={myComplexString} />;
+    //     }
+    //   `,
+    //   output: normalizeIndent`
+    //     const Component = () => {
+    //       const myComplexString = css\`color: red;\`;
+    //       return <Child prop={myComplexString} />;
+    //     }
+    //   `,
+    //   options: [{ strict: true }],
+    //   errors: [{ messageId: "unknown-usememo-props" }],
+    // },
   ],
 });

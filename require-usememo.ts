@@ -10,11 +10,22 @@ import {
   MemoStatus,
 } from "./common";
 
-const hookNameRegex = /^use[A-Z0-9].*$/;
+const hookNames: string[] = [
+  'useState',
+  'useEffect',
+  'useContext',
+  'useReducer',
+  'useCallback',
+  'useMemo',
+  'useRef',
+  'useImperativeHandle',
+  'useLayoutEffect',
+  'useDebugValue',
+]
 
 function isHook(node: TSESTree.Node) {
   if (node.type === "Identifier") {
-    return hookNameRegex.test(node.name);
+    return Boolean(hookNames.find(a => a.includes(node.name)));
   } else if (
     node.type === "MemberExpression" &&
     !node.computed &&
@@ -113,16 +124,16 @@ const rule: Rule.RuleModule = {
           if (expression?.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
               case MemoStatus.UnmemoizedObject:
-                context.report({ node, messageId: "object-usememo-props", fix: (fixer) => useMemoFix(fixer, false) });
+                context.report({ node, messageId: "object-usememo-props" });
                 break;
               case MemoStatus.UnmemoizedArray:
-                context.report({ node, messageId: "array-usememo-props", fix: (fixer) => useMemoFix(fixer) });
+                context.report({ node, messageId: "array-usememo-props" });
                 break;
               case MemoStatus.UnmemoizedNew:
-                context.report({ node, messageId: "instance-usememo-props", fix: (fixer) => useMemoFix(fixer) });
+                context.report({ node, messageId: "instance-usememo-props" });
                 break;
               case MemoStatus.UnmemoizedFunction:
-                context.report({ node, messageId: "function-usecallback-props", fix: useCallbackFix });
+                context.report({ node, messageId: "function-usecallback-props" });
                 break;
               case MemoStatus.UnmemoizedFunctionCall:
               case MemoStatus.UnmemoizedOther:
