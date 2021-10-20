@@ -57,7 +57,11 @@ function checkFunction(
           }
           const sourceCode = context.getSourceCode();
 // FIX THIS FOR FAILING SPEC
+          const text = sourceCode.getText(scope);
           let fixedCode = `memo(${sourceCode.getText(scope)})`
+          if (text.startsWith('useRef(function')) {
+            fixedCode = `useRef(${sourceCode.getText(scope).replace('useRef', 'memo')})`
+          }
           // @ts-ignore
           return [
             fixer.insertTextBefore(parent.parent.parent, 'import { memo } from \'react\'\n\n'),

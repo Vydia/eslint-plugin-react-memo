@@ -108,104 +108,104 @@ ruleTester.run("useCallback", rule, {
       // `,
       errors: [{ messageId: "function-usecallback-props" }],
     },
+    // TODO: setup fixer for the following spec (output currently matches code)
+    {
+      code: normalizeIndent`
+        const Component = () => {
+          let myFn = useCallback(() => ({}));
+          myFn = () => ({});
+          return <Child prop={myFn} />;
+        }
+      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     let myFn = useCallback(() => ({}));
+      //     myFn = () => ({});
+      //     return <Child prop={myFn} />;
+      //   }
+      // `,
+      errors: [{ messageId: "usememo-const" }],
+    },
+    // TODO: setup fixer for the following spec (output currently matches code)
+    {
+      code: normalizeIndent`
+        const Component = () => {
+          return <Child prop={() => {}} />;
+        }
+      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     return <Child prop={() => {}} />;
+      //   }
+      // `,
+      errors: [{ messageId: "function-usecallback-props" }],
+    },
+    // TODO: setup fixer for the following spec (output currently matches code)
+    {
+      code: normalizeIndent`
+        const Component = () => {
+          return <Child prop={() => []} />;
+        }
+      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     return <Child prop={() => []} />;
+      //   }
+      // `,
+      errors: [{ messageId: "function-usecallback-props" }],
+    },
     // // TODO: setup fixer for the following spec (output currently matches code)
-    // {
-    //   code: normalizeIndent`
-    //     const Component = () => {
-    //       let myFn = useCallback(() => ({}));
-    //       myFn = () => ({});
-    //       return <Child prop={myFn} />;
-    //     }
-    //   `,
-    //   output: normalizeIndent`
-    //     const Component = () => {
-    //       let myFn = useCallback(() => ({}));
-    //       myFn = () => ({});
-    //       return <Child prop={myFn} />;
-    //     }
-    //   `,
-    //   errors: [{ messageId: "usememo-const" }],
-    // },
+    {
+      code: normalizeIndent`
+        const Component = () => {
+          const myFn = memoize(() => {});
+          return <Child prop={myFn} />;
+        }
+      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     const myFn = memoize(() => {});
+      //     return <Child prop={myFn} />;
+      //   }
+      // `,
+      options: [{ strict: true }],
+      errors: [{ messageId: "unknown-usememo-props" }],
+    },
     // // TODO: setup fixer for the following spec (output currently matches code)
-    // {
-    //   code: normalizeIndent`
-    //     const Component = () => {
-    //       return <Child prop={() => {}} />;
-    //     }
-    //   `,
-    //   output: normalizeIndent`
-    //     const Component = () => {
-    //       return <Child prop={() => {}} />;
-    //     }
-    //   `,
-    //   errors: [{ messageId: "function-usecallback-props" }],
-    // },
+    {
+      code: normalizeIndent`
+        const Component = () => {
+          const myFn = lodash.memoize(() => []);
+          return <Child prop={myFn} />;
+        }
+      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     const myFn = lodash.memoize(() => []);
+      //     return <Child prop={myFn} />;
+      //   }
+      // `,
+      options: [{ strict: true }],
+      errors: [{ messageId: "unknown-usememo-props" }],
+    },
     // // TODO: setup fixer for the following spec (output currently matches code)
-    // {
-    //   code: normalizeIndent`
-    //     const Component = () => {
-    //       return <Child prop={() => []} />;
-    //     }
-    //   `,
-    //   output: normalizeIndent`
-    //     const Component = () => {
-    //       return <Child prop={() => []} />;
-    //     }
-    //   `,
-    //   errors: [{ messageId: "function-usecallback-props" }],
-    // },
-    // // TODO: setup fixer for the following spec (output currently matches code)
-    // {
-    //   code: normalizeIndent`
-    //     const Component = () => {
-    //       const myFn = memoize(() => {});
-    //       return <Child prop={myFn} />;
-    //     }
-    //   `,
-    //   output: normalizeIndent`
-    //     const Component = () => {
-    //       const myFn = memoize(() => {});
-    //       return <Child prop={myFn} />;
-    //     }
-    //   `,
-    //   options: [{ strict: true }],
-    //   errors: [{ messageId: "unknown-usememo-props" }],
-    // },
-    // // TODO: setup fixer for the following spec (output currently matches code)
-    // {
-    //   code: normalizeIndent`
-    //     const Component = () => {
-    //       const myFn = lodash.memoize(() => []);
-    //       return <Child prop={myFn} />;
-    //     }
-    //   `,
-    //   output: normalizeIndent`
-    //     const Component = () => {
-    //       const myFn = lodash.memoize(() => []);
-    //       return <Child prop={myFn} />;
-    //     }
-    //   `,
-    //   options: [{ strict: true }],
-    //   errors: [{ messageId: "unknown-usememo-props" }],
-    // },
-    // // TODO: setup fixer for the following spec (output currently matches code)
-    // {
-    //   code: normalizeIndent`
-    //     const Component = () => {
-    //       const myFn1 = () => [];
-    //       const myFn2 = useCallback(() => myFn1, [myFn1]);
-    //       return <Child prop={myFn2} />;
-    //     }
-    //   `,
-    //   output: normalizeIndent`
-    //     const Component = () => {
-    //       const myFn1 = () => [];
-    //       const myFn2 = useCallback(() => myFn1, [myFn1]);
-    //       return <Child prop={myFn2} />;
-    //     }
-    //   `,
-    //   errors: [{ messageId: "function-usecallback-deps" }],
-    // },
+    {
+      code: normalizeIndent`
+        const Component = () => {
+          const myFn1 = () => [];
+          const myFn2 = useCallback(() => myFn1, [myFn1]);
+          return <Child prop={myFn2} />;
+        }
+      `,
+      // output: normalizeIndent`
+      //   const Component = () => {
+      //     const myFn1 = () => [];
+      //     const myFn2 = useCallback(() => myFn1, [myFn1]);
+      //     return <Child prop={myFn2} />;
+      //   }
+      // `,
+      errors: [{ messageId: "function-usecallback-deps" }],
+    },
     // {
     //   code: normalizeIndent`
     //     // @flow

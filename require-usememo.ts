@@ -2,41 +2,13 @@ import { Rule } from "eslint";
 import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
 import { Node } from "@typescript-eslint/types/dist/ast-spec"
-import { isArrowFn } from "./utils";
+import { isArrowFn, isHook } from "./utils";
 
 import {
   getExpressionMemoStatus,
   isComplexComponent,
   MemoStatus,
 } from "./common";
-
-const hookNames: string[] = [
-  'useState',
-  'useEffect',
-  'useContext',
-  'useReducer',
-  'useCallback',
-  'useMemo',
-  'useRef',
-  'useImperativeHandle',
-  'useLayoutEffect',
-  'useDebugValue',
-]
-
-function isHook(node: TSESTree.Node) {
-  if (node.type === "Identifier") {
-    return Boolean(hookNames.find(a => a.includes(node.name)));
-  } else if (
-    node.type === "MemberExpression" &&
-    !node.computed &&
-    isHook(node.property)
-  ) {
-    const obj = node.object;
-    return obj.type === "Identifier" && obj.name === "React";
-  } else {
-    return false;
-  }
-}
 
 const messages = {
   "object-usememo-props":
