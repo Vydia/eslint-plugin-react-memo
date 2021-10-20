@@ -86,6 +86,8 @@ ruleTester.run("memo", rule, {
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
+        import { memo } from 'react'
+
         const Component = memo(() => <div />)
       `
     },
@@ -95,17 +97,20 @@ ruleTester.run("memo", rule, {
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
+        import { memo } from 'react'
+
         const Component = memo(useRef(() => <div />))
       `
     },
-    // TODO: setup fixer for the following spec (output currently matches code)
     {
       code: normalizeIndent`
         const Component = function Component() { return <div />; }
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
-        const Component = function Component() { return <div />; }
+        import { memo } from 'react'
+
+        const Component = memo(function Component() { return <div />; })
       `
     },
     // TODO: setup fixer for the following spec (output currently matches code)
@@ -115,7 +120,9 @@ ruleTester.run("memo", rule, {
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
-        const Component = useRef(function() { return <div />; })
+        import { memo } from 'react'
+
+        const Component = useRef(memo(function() { return <div />; }))
       `
     },
     // TODO: setup fixer for the following spec (output currently matches code)
@@ -125,7 +132,9 @@ ruleTester.run("memo", rule, {
       `,
       errors: [{ messageId: "memo-required" }],
       output: normalizeIndent`
-        function Component() { return <div />; }
+        import { memo } from 'react'
+
+        memo(function Component() { return <div />; })
       `
     },
     // {

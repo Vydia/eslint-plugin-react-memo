@@ -47,23 +47,23 @@ function checkFunction(
     const { id } = currentNode;
     if (id.type === "Identifier") {
       if (componentNameRegex.test(id.name)) {
-        if (node.type === 'ArrowFunctionExpression') {
-          context.report({ node, messageId: "memo-required", fix: (fixer): Rule.Fix => {
-            const parent = node.parent
-            let scope
-            if (parent.type === 'VariableDeclarator') {
-              scope = node
-            } else {
-              scope = parent
-            }
-            const sourceCode = context.getSourceCode();
-            let fixedCode = `memo(${sourceCode.getText(scope)})`
-
-            return fixer.replaceText(scope, fixedCode);
-          } });
-          return
-        }
-        context.report({ node, messageId: "memo-required" });
+        context.report({ node, messageId: "memo-required", fix: (fixer): Rule.Fix => {
+          const parent = node.parent
+          let scope
+          if (parent.type === 'VariableDeclarator') {
+            scope = node
+          } else {
+            scope = parent
+          }
+          const sourceCode = context.getSourceCode();
+// FIX THIS FOR FAILING SPEC
+          let fixedCode = `memo(${sourceCode.getText(scope)})`
+          // @ts-ignore
+          return [
+            fixer.insertTextBefore(parent.parent.parent, 'import { memo } from \'react\'\n\n'),
+            fixer.replaceText(scope, fixedCode),
+          ]
+        } });
       }
     }
   } else if (
@@ -71,7 +71,18 @@ function checkFunction(
     currentNode.type === "Program"
   ) {
     if (node.id !== null && componentNameRegex.test(node.id.name)) {
-      context.report({ node, messageId: "memo-required" });
+      context.report({ node, messageId: "memo-required", fix: (fixer): Rule.Fix => {
+        // const parent = node?.parent
+        let scope = node
+
+        const sourceCode = context.getSourceCode();
+        let fixedCode = `memo(${sourceCode.getText(scope)})`
+        // @ts-ignore
+        return [
+          fixer.insertTextBefore(node, 'import { memo } from \'react\'\n\n'),
+          fixer.replaceText(node, fixedCode),
+        ]
+      } });
     } else {
       if (context.getFilename() === "<input>") return;
       const filename = path.basename(context.getFilename());
