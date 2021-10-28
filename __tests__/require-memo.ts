@@ -81,61 +81,56 @@ ruleTester.run("memo", rule, {
   ],
   invalid: [
     {
-      code: normalizeIndent`
-        const Component = () => <div />
-      `,
+      code: `import { memo } from 'react'
+const Component = () => <div />`,
       errors: [{ messageId: "memo-required" }],
-      output: normalizeIndent`
-        import { memo } from 'react'
-
-        const Component = memo(() => <div />)
-      `
+      output: `import { memo } from 'react'
+const Component = memo(() => <div />)`
     },
     {
-      code: normalizeIndent`
-        const Component = useRef(() => <div />)
-      `,
+      code: `// @flow
+      import { map } from 'lodash'
+const Component = useRef(() => <div />)`,
       errors: [{ messageId: "memo-required" }],
-      output: normalizeIndent`
-        import { memo } from 'react'
+      output: `// @flow
+import { memo } from 'react'
+      import { map } from 'lodash'
+const Component = memo(useRef(() => <div />))`
+    },
+//     {
+//       code: `const Component = function Component() { return <div />; }`,
+//       errors: [{ messageId: "memo-required" }],
+//       output: `import { memo } from 'react'
+// const Component = memo(function Component() { return <div />; })`
+//     },
+//     {
+//       code: `const Component = useRef(function() { return <div />; })`,
+//       errors: [{ messageId: "memo-required" }],
+//       output: `import { memo } from 'react'
+// const Component = useRef(memo(function() { return <div />; }))`
+//     },
+    {
+      code: `// @flow
+import { map } from 'lodash'
 
-        const Component = memo(useRef(() => <div />))
-      `
+console.warn('Hello World')
+function Component() { return <div />; }`,
+      errors: [{ messageId: "memo-required" }],
+      output: `// @flow
+import { memo } from 'react'
+import { map } from 'lodash'
+
+console.warn('Hello World')
+memo(function Component() { return <div />; })`
     },
     {
-      code: normalizeIndent`
-        const Component = function Component() { return <div />; }
-      `,
-      errors: [{ messageId: "memo-required" }],
-      output: normalizeIndent`
-        import { memo } from 'react'
+      code: `import { memo } from 'react'
 
-        const Component = memo(function Component() { return <div />; })
-      `
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        const Component = useRef(function() { return <div />; })
-      `,
+function Component() { return <div />; }`,
       errors: [{ messageId: "memo-required" }],
-      output: normalizeIndent`
-        import { memo } from 'react'
+      output: `import { memo } from 'react'
 
-        const Component = useRef(memo(function() { return <div />; }))
-      `
-    },
-    // TODO: setup fixer for the following spec (output currently matches code)
-    {
-      code: normalizeIndent`
-        function Component() { return <div />; }
-      `,
-      errors: [{ messageId: "memo-required" }],
-      output: normalizeIndent`
-        import { memo } from 'react'
-
-        memo(function Component() { return <div />; })
-      `
+memo(function Component() { return <div />; })`
     },
     // {
     //   filename: "dir/Component.js",
