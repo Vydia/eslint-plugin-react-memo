@@ -2,13 +2,30 @@ import { Rule } from "eslint";
 import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
 import { Node } from "@typescript-eslint/types/dist/ast-spec"
-import { isArrowFn, isHook } from "./utils";
+import { isArrowFn } from "./utils";
 
 import {
   getExpressionMemoStatus,
   isComplexComponent,
   MemoStatus,
 } from "./common";
+
+const hookNameRegex = /^use[A-Z0-9].*$/;
+
+function isHook(node: TSESTree.Node) {
+  if (node.type === "Identifier") {
+    return hookNameRegex.test(node.name);
+  } else if (
+    node.type === "MemberExpression" &&
+    !node.computed &&
+    isHook(node.property)
+  ) {
+    const obj = node.object;
+    return obj.type === "Identifier" && obj.name === "React";
+  } else {
+    return false;
+  }
+}
 
 const messages = {
   "object-usememo-props":
@@ -96,16 +113,16 @@ const rule: Rule.RuleModule = {
           if (expression?.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
               case MemoStatus.UnmemoizedObject:
-                context.report({ node, messageId: "object-usememo-props" });
+                context.report({ node, messageId: "object-usememo-props", fix: (fixer) => useMemoFix(fixer, false) });
                 break;
               case MemoStatus.UnmemoizedArray:
-                context.report({ node, messageId: "array-usememo-props" });
+                context.report({ node, messageId: "array-usememo-props", fix: (fixer) => useMemoFix(fixer) });
                 break;
               case MemoStatus.UnmemoizedNew:
-                context.report({ node, messageId: "instance-usememo-props" });
+                context.report({ node, messageId: "instance-usememo-props", fix: (fixer) => useMemoFix(fixer) });
                 break;
               case MemoStatus.UnmemoizedFunction:
-                context.report({ node, messageId: "function-usecallback-props" });
+                context.report({ node, messageId: "function-usecallback-props", fix: useCallbackFix });
                 break;
               case MemoStatus.UnmemoizedFunctionCall:
               case MemoStatus.UnmemoizedOther:
