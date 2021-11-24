@@ -1,28 +1,14 @@
 import { Rule } from "eslint";
 import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
+import { Node } from "@typescript-eslint/types/dist/ast-spec"
+import { isArrowFn, isHook } from "./utils";
+
 import {
   getExpressionMemoStatus,
   isComplexComponent,
   MemoStatus,
 } from "./common";
-
-const hookNameRegex = /^use[A-Z0-9].*$/;
-
-function isHook(node: TSESTree.Node) {
-  if (node.type === "Identifier") {
-    return hookNameRegex.test(node.name);
-  } else if (
-    node.type === "MemberExpression" &&
-    !node.computed &&
-    isHook(node.property)
-  ) {
-    const obj = node.object;
-    return obj.type === "Identifier" && obj.name === "React";
-  } else {
-    return false;
-  }
-}
 
 const messages = {
   "object-usememo-props":
@@ -55,6 +41,7 @@ const messages = {
 
 const rule: Rule.RuleModule = {
   meta: {
+    fixable: 'code',
     messages,
     schema: [
       {
@@ -69,27 +56,56 @@ const rule: Rule.RuleModule = {
       context.report({ node, messageId: messageId as string });
     }
 
+    const useMemoFix = (fixer: Rule.RuleFixer, implicitReturn: boolean = true): Rule.Fix | null => {
+      const sourceCode = context.getSourceCode();
+      const references = context.getScope()?.references
+      const filteredRefs = references?.filter((reference) => reference?.writeExpr)
+      // @ts-ignore
+      const definition = filteredRefs?.[0]?.writeExpr?.parent
+      if (!definition) return null
+      const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
+      const fixedCode = `${name.trim()} = useMemo(() => ${implicitReturn ? value.trim() : `(${value.trim()})`}, [])`
+      return fixer.replaceText(definition, fixedCode)
+    }
+
+    const useCallbackFix = (fixer: Rule.RuleFixer): Rule.Fix | null => {
+      let fixedCode = ''
+      const sourceCode = context.getSourceCode();
+      const references = context.getScope()?.references
+      const filteredRefs = references?.filter((reference) => reference?.writeExpr)
+      // @ts-ignore
+      const definition = filteredRefs?.[0]?.writeExpr?.parent
+      if (!definition) return null
+      const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
+      if(isArrowFn(value)){
+        fixedCode = `${name.trim()} = useCallback(${value.trim()}, [])`
+      } else {
+        fixedCode = `${name.trim()} = useCallback(${value.replace(`function ${name.trim()}`, 'function').trim()}, [])`
+      }
+      return fixer.replaceText(definition, fixedCode)
+    }
+
     return {
-      JSXAttribute: (node: ESTree.Node & Rule.NodeParentExtension) => {
+      JSXAttribute: (node: Rule.Node & Rule.NodeParentExtension) => {
         const { parent, value } = (node as unknown) as TSESTree.JSXAttribute &
           Rule.NodeParentExtension;
         if (value === null) return;
         if (!isComplexComponent(parent)) return;
         if (value.type === "JSXExpressionContainer") {
           const { expression } = value;
-          if (expression.type !== "JSXEmptyExpression") {
+          if (expression?.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
               case MemoStatus.UnmemoizedObject:
-                report(node, "object-usememo-props");
+                context.report({ node, messageId: "object-usememo-props" });
                 break;
               case MemoStatus.UnmemoizedArray:
-                report(node, "array-usememo-props");
+                context.report({ node, messageId: "array-usememo-props" });
                 break;
               case MemoStatus.UnmemoizedNew:
-                report(node, "instance-usememo-props");
+                context.report({ node, messageId: "instance-usememo-props" });
                 break;
               case MemoStatus.UnmemoizedFunction:
-                report(node, "function-usecallback-props");
+                context.report({ node, messageId: "function-usecallback-props" });
                 break;
               case MemoStatus.UnmemoizedFunctionCall:
               case MemoStatus.UnmemoizedOther:

@@ -12,7 +12,7 @@ ruleTester.run("useMemo children", rule, {
   valid: [
     {
       code: `const Component = () => {
-      const children = React.useMemo(() => <div><Grandchild /></div>, []);
+      const children = useMemo(() => <div><Grandchild /></div>, []);
       return <Child>{children}</Child>;
     }`,
     },
@@ -23,7 +23,7 @@ ruleTester.run("useMemo children", rule, {
     },
     {
       code: `const Component = () => {
-      const renderFn = React.useCallback(() => <div><Grandchild /></div>, []);
+      const renderFn = useCallback(() => <div><Grandchild /></div>, []);
       return <Child>{renderFn}</Child>;
     }`,
     },
@@ -31,7 +31,7 @@ ruleTester.run("useMemo children", rule, {
   invalid: [
     {
       code: `const Component = () => {
-      const children = React.useMemo(() => <div><Grandchild /></div>, []);
+      const children = useMemo(() => <div><Grandchild /></div>, []);
       return <Child>
         <>
           {children}
