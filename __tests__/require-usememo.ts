@@ -166,12 +166,12 @@ return (<>
 }
       `,
       output: `const Component = () => {
-const asdf = useMemo(() => (<div>
+const prop50 = useMemo(() => (<div>
       { t.asdf }
     </div>), [])
 return (<>
   <Child
-    prop={asdf}
+    prop={prop50}
     otherProp={1}
     anotherProp={2}
   />

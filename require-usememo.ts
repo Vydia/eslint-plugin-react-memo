@@ -131,7 +131,7 @@ const rule: Rule.RuleModule = {
       const name = nodeText.match(/^\w*/)[0]
       console.log(name)
       // @ts-ignore
-      const nameOfConst = `${name}${node.start}`
+      const nameOfConst = `${name}${node.range[0]}`
       console.log(nameOfConst)
       // const definition = filteredRefs?.[0]?.identifier.parent
       // if (!definition) return null
