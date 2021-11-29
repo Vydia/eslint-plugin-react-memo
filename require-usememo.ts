@@ -9,6 +9,8 @@ import {
   isComplexComponent,
   MemoStatus,
 } from "./common";
+import { fromPairs } from "lodash";
+import { isConstructorDeclaration } from "typescript";
 
 const hookNameRegex = /^use[A-Z0-9].*$/;
 
@@ -69,6 +71,7 @@ const rule: Rule.RuleModule = {
     ],
   },
   create: (context) => {
+    let alreadyFixedJsx: boolean = false
     function report(node: Rule.Node, messageId: keyof typeof messages) {
       context.report({ node, messageId: messageId as string });
     }
@@ -83,6 +86,73 @@ const rule: Rule.RuleModule = {
       const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
       const fixedCode = `${name.trim()} = useMemo(() => ${implicitReturn ? value.trim() : `(${value.trim()})`}, [])`
       return fixer.replaceText(definition, fixedCode)
+    }
+
+    const useMemoJsxFix = (fixer: Rule.RuleFixer, node: Rule.Node,  implicitReturn: boolean = true): Rule.Fix | null => {
+      // console.log(fixer)
+      // console.log(context.options)
+      if (alreadyFixedJsx) {
+        alreadyFixedJsx = false
+        return null
+      }
+      const sourceCode = context.getSourceCode();
+      const references = context.getScope()?.references
+      // const returnStatement = references?[0]
+      // @ts-ignore
+      const block = context.getScope().block.body.body
+      // console.log(context.getScope().block)
+      if (!block) return null
+      const returnLine = block[block.length - 1].loc.start.line
+      const lineAboveReturn = sourceCode.getIndexFromLoc({ line: returnLine, column: 0 })
+// @ts-ignore
+      const filteredRefs = references?.filter((reference) => reference?.identifier.type === 'Identifier')
+// @ts-ignore
+      // console.log(filteredRefs)
+      // @ts-ignore
+      // console.log(filteredRefs[0].identifier.parent.parent.parent.parent.parent)
+      // @ts-ignore
+      // const parentAttributes = filteredRefs[0].identifier.parent.attributes
+      // @ts-ignore
+      // const filteredJsxExp = parentAttributes.filter((ref) => ref.value.type === 'JSXExpressionContainer')
+      // @ts-ignore
+      // console.log(filteredJsxExp)
+      // console.log(sourceCode.getText(references[1].identifier))
+      // console.log(sourceCode.getText(filteredRefs[0].identifier.parent).split('.'))
+      // console.warn(node)
+      // console.warn('node' ,sourceCode.getText(node))
+      // @ts-ignore
+      const [t, nameOfConst] = sourceCode.getText(filteredRefs[0].identifier.parent).split('.')
+      // @ts-ignore
+      const nodeText = sourceCode.getText(node)
+      // const [name, value] = sourceCode.getText(node).split(/[^\w*=](.*)/)
+      // console.log(name)
+      const value = nodeText.replace(/^\w*=/, '')
+      // @ts-ignore
+      const name = nodeText.match(/^\w*/)[0]
+      console.log(name)
+      // @ts-ignore
+      const nameOfConst = `${name}${node.start}`
+      console.log(nameOfConst)
+      // const definition = filteredRefs?.[0]?.identifier.parent
+      // if (!definition) return null
+      // const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
+      // const fixedCode = `${name.trim()} = useMemo(() => ${implicitReturn ? value.trim() : `(${value.trim()})`}, [])`
+      const replacedParens = value.replace(/^{/, '(').replace(/\}$/, ')')
+      const toInsert = `const ${nameOfConst} = useMemo(() => ${replacedParens}, [])\n`
+      // console.log(filteredRefs[0].identifier.parent.parent.parent.parent.parent)
+      // fixer.insertTextAfterRange([lineAboveReturn, lineAboveReturn], toInsert)
+      // fixer.replaceText(filteredRefs[0].identifier.parent.parent.parent.parent.parent, `${name}={${nameOfConst}}`)
+      // return null
+      // console.log(toInsert)
+      // alreadyFixedJsx = true
+// @ts-ignore
+      // const identifier = filteredRefs[0].identifier.parent.parent.parent.parent.parent
+      // console.log(identifier)
+      // @ts-ignore
+      return [
+        fixer.insertTextAfterRange([lineAboveReturn, lineAboveReturn], toInsert),
+        fixer.replaceText(node, `${name}={${nameOfConst}}`),
+      ].filter(i => i)
     }
 
     const useCallbackFix = (fixer: Rule.RuleFixer): Rule.Fix | null => {
@@ -112,26 +182,27 @@ const rule: Rule.RuleModule = {
           const { expression } = value;
           if (expression?.type !== "JSXEmptyExpression") {
             switch (getExpressionMemoStatus(context, expression)) {
-              case MemoStatus.UnmemoizedObject:
-                context.report({ node, messageId: "object-usememo-props", fix: (fixer) => useMemoFix(fixer, false) });
-                break;
-              case MemoStatus.UnmemoizedArray:
-                context.report({ node, messageId: "array-usememo-props", fix: (fixer) => useMemoFix(fixer) });
-                break;
-              case MemoStatus.UnmemoizedNew:
-                context.report({ node, messageId: "instance-usememo-props", fix: (fixer) => useMemoFix(fixer) });
-                break;
-              case MemoStatus.UnmemoizedFunction:
-                context.report({ node, messageId: "function-usecallback-props", fix: useCallbackFix });
-                break;
-              case MemoStatus.UnmemoizedFunctionCall:
-              case MemoStatus.UnmemoizedOther:
-                if (context.options?.[0]?.strict) {
-                  report(node, "unknown-usememo-props");
-                }
-                break;
+              // case MemoStatus.UnmemoizedObject:
+              //   context.report({ node, messageId: "object-usememo-props", fix: (fixer) => useMemoFix(fixer, false) });
+              //   break;
+              // case MemoStatus.UnmemoizedArray:
+              //   context.report({ node, messageId: "array-usememo-props", fix: (fixer) => useMemoFix(fixer) });
+              //   break;
+              // case MemoStatus.UnmemoizedNew:
+              //   context.report({ node, messageId: "instance-usememo-props", fix: (fixer) => useMemoFix(fixer) });
+              //   break;
+              // case MemoStatus.UnmemoizedFunction:
+              //   context.report({ node, messageId: "function-usecallback-props", fix: useCallbackFix });
+              //   break;
+              // case MemoStatus.UnmemoizedFunctionCall:
+              // case MemoStatus.UnmemoizedOther:
+              //   if (context.options?.[0]?.strict) {
+              //     report(node, "unknown-usememo-props");
+              //   }
+              //   break;
               case MemoStatus.UnmemoizedJSX:
-                report(node, "jsx-usememo-props");
+                // console.log('sup', node)
+                context.report({ node, messageId: "jsx-usememo-props", fix: (fixer) => useMemoJsxFix(fixer, node) });
                 break;
             }
           }
