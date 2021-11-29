@@ -166,12 +166,98 @@ return (<>
 }
       `,
       output: `const Component = () => {
-const prop50 = useMemo(() => (<div>
+const prop = useMemo(() => (<div>
       { t.asdf }
     </div>), [])
 return (<>
   <Child
-    prop={prop50}
+    prop={prop}
+    otherProp={1}
+    anotherProp={2}
+  />
+</>);
+}
+      `,
+      errors: [{ messageId: "jsx-usememo-props" }],
+    },
+    {
+      code: `const Component = () => {
+return (<>
+  <Child
+    prop={<div>
+      { t.asdf }
+    </div>}
+    otherProp={1}
+    anotherProp={2}
+  />
+  <Child
+    prop={<div>
+      { t.asdf2 }
+    </div>}
+    otherProp={1}
+    anotherProp={2}
+  />
+</>);
+}
+      `,
+      output: `const Component = () => {
+const prop = useMemo(() => (<div>
+      { t.asdf }
+    </div>), [])
+return (<>
+  <Child
+    prop={prop}
+    otherProp={1}
+    anotherProp={2}
+  />
+  <Child
+    prop={<div>
+      { t.asdf2 }
+    </div>}
+    otherProp={1}
+    anotherProp={2}
+  />
+</>);
+}
+      `,
+      errors: [{ messageId: "jsx-usememo-props" }, { messageId: "jsx-usememo-props" }],
+    },
+    {
+      code: `const Component = () => {
+const prop = useMemo(() => (<div>
+      { t.asdf }
+    </div>), [])
+return (<>
+  <Child
+    prop={prop}
+    otherProp={1}
+    anotherProp={2}
+  />
+  <Child
+    prop={<div>
+      { t.asdf2 }
+    </div>}
+    otherProp={1}
+    anotherProp={2}
+  />
+</>);
+}
+      `,
+      output: `const Component = () => {
+const prop = useMemo(() => (<div>
+      { t.asdf }
+    </div>), [])
+const prop2 = useMemo(() => (<div>
+      { t.asdf2 }
+    </div>), [])
+return (<>
+  <Child
+    prop={prop}
+    otherProp={1}
+    anotherProp={2}
+  />
+  <Child
+    prop={prop2}
     otherProp={1}
     anotherProp={2}
   />

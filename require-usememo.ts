@@ -12,7 +12,12 @@ import {
 import { fromPairs } from "lodash";
 import { isConstructorDeclaration } from "typescript";
 
+type VarNames = {
+  [base: string]: number,
+}
+
 const hookNameRegex = /^use[A-Z0-9].*$/;
+const BASE_COUNT_PATTERN = /^([A-Za-z]+)(\d*)$/;
 
 function isHook(node: TSESTree.Node) {
   if (node.type === "Identifier") {
@@ -71,6 +76,7 @@ const rule: Rule.RuleModule = {
     ],
   },
   create: (context) => {
+    const varNames: VarNames = {}
     let alreadyFixedJsx: boolean = false
     function report(node: Rule.Node, messageId: keyof typeof messages) {
       context.report({ node, messageId: messageId as string });
@@ -129,10 +135,14 @@ const rule: Rule.RuleModule = {
       const value = nodeText.replace(/^\w*=/, '')
       // @ts-ignore
       const name = nodeText.match(/^\w*/)[0]
-      console.log(name)
+      // console.log(name)
+      const match = name.match(BASE_COUNT_PATTERN) || []
+      const base = match[1] || ''
+      const suffix = varNames[base]
+      varNames[base] = (suffix || 0) + 1
       // @ts-ignore
-      const nameOfConst = `${name}${node.range[0]}`
-      console.log(nameOfConst)
+      const nameOfConst = `${name}${suffix ? suffix + 1 : ''}`
+      // console.log(nameOfConst)
       // const definition = filteredRefs?.[0]?.identifier.parent
       // if (!definition) return null
       // const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
@@ -249,6 +259,27 @@ const rule: Rule.RuleModule = {
             }
           }
         }
+      },
+
+      // Keep track of variable names so we don't conflict
+      VariableDeclarator (node) {
+        // @ts-ignore
+        const varName = node.id?.name
+        // console.log('varName', varName)
+        // const [_full, base, count] = varName.match(BASE_COUNT_PATTERN) || []
+        const match = varName.match(BASE_COUNT_PATTERN)
+        if (!match) return
+        const base = match[1]
+        const count = parseInt(match[2] || 1)
+        // console.log('base count', base, count)
+        if (!varNames[base]) {
+          varNames[base] = count
+        } else if (varNames[base] < count) {
+          varNames[base] = count
+        }
+
+        // console.log('varNames', varNames)
+        // const sourceCode = context.getSourceCode()
       },
     };
   },
