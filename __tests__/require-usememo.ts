@@ -266,6 +266,50 @@ return (<>
       `,
       errors: [{ messageId: "jsx-usememo-props" }],
     },
+    {
+      code: `const Component = () => {
+const prop68 = useMemo(() => (<div>
+      { t.asdf }
+    </div>), [])
+return (<>
+  <Child
+    prop={prop68}
+    otherProp={1}
+    anotherProp={2}
+  />
+  <Child
+    prop={<div>
+      { t.asdf2 }
+    </div>}
+    otherProp={1}
+    anotherProp={2}
+  />
+</>);
+}
+      `,
+      output: `const Component = () => {
+const prop68 = useMemo(() => (<div>
+      { t.asdf }
+    </div>), [])
+const prop69 = useMemo(() => (<div>
+      { t.asdf2 }
+    </div>), [])
+return (<>
+  <Child
+    prop={prop68}
+    otherProp={1}
+    anotherProp={2}
+  />
+  <Child
+    prop={prop69}
+    otherProp={1}
+    anotherProp={2}
+  />
+</>);
+}
+      `,
+      errors: [{ messageId: "jsx-usememo-props" }],
+    },
     // // TODO: setup fixer for the following spec (output currently matches code)
     // {
     //   code: normalizeIndent`
