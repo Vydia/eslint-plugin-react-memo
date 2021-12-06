@@ -1,0 +1,48 @@
+{
+  "name": "eslint-plugin-react-memo",
+  "version": "0.0.16",
+  "description": "",
+  "main": "dist/index.js",
+  "author": "Stefano J. Attardi <github@attardi.org>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/steadicat/eslint-plugin-react-memo.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@types/eslint": "^7.2.7",
+    "@types/jest": "^26.0.22",
+    "@types/lodash": "^4.14.175",
+    "@typescript-eslint/parser": "^4.19.0",
+    "@typescript-eslint/types": "^5.0.0",
+    "eslint": "^7.23.0",
+    "gitpkg": "^1.0.0-beta.2",
+    "jest": "^25.0.0",
+    "rollup": "^2.43.1",
+    "ts-jest": "^26.5.4",
+    "typescript": "^4.2.3"
+  },
+  "scripts": {
+    "test": "jest",
+    "test-debug": "node --inspect-brk node_modules/.bin/jest --watch",
+    "test-watch": "jest --watch",
+    "build": "rm -rf dist && rollup -c",
+    "build-and-watch": "rm -rf dist && rollup -c --watch",
+    "prepublish:public": "npm run build && npm run bump-version",
+    "publish:public": "npm publish --access public",
+    "deploy": "yarn build && yarn publish-git",
+    "publish-git": "yarn version-bump && gitpkg publish",
+    "link-to-web": "cd ../web && yarn link-eslint-plugin-react-memo-auto && cd ../eslint-plugin-react-memo && yarn build-and-watch",
+    "link-prepare": "yarn install && yarn link && echo 'Now run \"yarn link-eslint-plugin-react-memo\" in mobile and web. And make sure you are running \"yarn build-and-watch\" to keep those dist folders available.'",
+    "unlink-prepare": "yarn install && yarn unlink && echo 'Now run \"yarn unlink-eslint-plugin-react-memo\" in mobile and web. And make sure you are running \"yarn build-and-watch\" to keep those dist folders available.'",
+    "version-bump": "npm version patch && git add . && git commit --allow-empty -m \"version-bump\""
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "typescript-eslint": "^0.0.1-alpha.0"
+  }
+}
