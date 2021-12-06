@@ -77,7 +77,28 @@ const rule: Rule.RuleModule = {
   },
   create: (context) => {
     const varNames: VarNames = {}
-    let alreadyFixedJsx: boolean = false
+    let alreadyImportedUseMemo: boolean = false
+    let alreadyImportedUseCallback: boolean = false
+
+    const getIndexToInsertImport = (sourceCode) => {
+      const allComments = sourceCode.getAllComments()
+      let insertImportLoc = 1
+      for (let i = 0, l = allComments.length; i < l; i++) {
+        const comment = allComments[i]
+        // @ts-ignore
+        const commentIsBackToBackWithPrev = comment.loc.start.line <= insertImportLoc + 1
+
+        if (!commentIsBackToBackWithPrev) break
+        // @ts-ignore
+        insertImportLoc = comment.loc.end.line
+      }
+      try {
+        return sourceCode.getIndexFromLoc({ line: insertImportLoc + 1, column: 0 })
+      } catch {
+        null
+      }
+    }
+
     function report(node: Rule.Node, messageId: keyof typeof messages) {
       context.report({ node, messageId: messageId as string });
     }
@@ -94,95 +115,90 @@ const rule: Rule.RuleModule = {
       return fixer.replaceText(definition, fixedCode)
     }
 
-    const useMemoJsxFix = (fixer: Rule.RuleFixer, node: Rule.Node,  implicitReturn: boolean = true): Rule.Fix | null => {
-      // console.log(fixer)
-      // console.log(context.options)
-      if (alreadyFixedJsx) {
-        alreadyFixedJsx = false
-        return null
-      }
+    const useMemoJsxFix = (fixer: Rule.RuleFixer, node: Rule.Node,  alreadyImportedUseMemo: boolean): Rule.Fix | null => {
       const sourceCode = context.getSourceCode();
-      const references = context.getScope()?.references
-      // const returnStatement = references?[0]
+      const importIndex = getIndexToInsertImport(sourceCode)
+      // const text = sourceCode.getText(scope);
+      // @ts-ignore
+      const fullSourceText = sourceCode.getText();
       // @ts-ignore
       const block = context.getScope().block.body.body
-      // console.log(context.getScope().block)
       if (!block) return null
       const returnLine = block[block.length - 1].loc.start.line
       const lineAboveReturn = sourceCode.getIndexFromLoc({ line: returnLine, column: 0 })
-// @ts-ignore
-      const filteredRefs = references?.filter((reference) => reference?.identifier.type === 'Identifier')
-// @ts-ignore
-      // console.log(filteredRefs)
-      // @ts-ignore
-      // console.log(filteredRefs[0].identifier.parent.parent.parent.parent.parent)
-      // @ts-ignore
-      // const parentAttributes = filteredRefs[0].identifier.parent.attributes
-      // @ts-ignore
-      // const filteredJsxExp = parentAttributes.filter((ref) => ref.value.type === 'JSXExpressionContainer')
-      // @ts-ignore
-      // console.log(filteredJsxExp)
-      // console.log(sourceCode.getText(references[1].identifier))
-      // console.log(sourceCode.getText(filteredRefs[0].identifier.parent).split('.'))
-      // console.warn(node)
-      // console.warn('node' ,sourceCode.getText(node))
-      // @ts-ignore
-      const [t, nameOfConst] = sourceCode.getText(filteredRefs[0].identifier.parent).split('.')
-      // @ts-ignore
+
       const nodeText = sourceCode.getText(node)
-      // const [name, value] = sourceCode.getText(node).split(/[^\w*=](.*)/)
-      // console.log(name)
+
       const value = nodeText.replace(/^\w*=/, '')
       // @ts-ignore
       const name = nodeText.match(/^\w*/)[0]
-      // console.log(name)
+
       const match = name.match(BASE_COUNT_PATTERN) || []
       const base = match[1] || ''
       const suffix = varNames[base]
       varNames[base] = (suffix || 0) + 1
       // @ts-ignore
       const nameOfConst = `${name}${suffix ? suffix + 1 : ''}`
-      // console.log(nameOfConst)
-      // const definition = filteredRefs?.[0]?.identifier.parent
-      // if (!definition) return null
-      // const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
-      // const fixedCode = `${name.trim()} = useMemo(() => ${implicitReturn ? value.trim() : `(${value.trim()})`}, [])`
+
       const replacedParens = value.replace(/^{/, '(').replace(/\}$/, ')')
-      const toInsert = `const ${nameOfConst} = useMemo(() => ${replacedParens}, [])\n`
-      // console.log(filteredRefs[0].identifier.parent.parent.parent.parent.parent)
-      // fixer.insertTextAfterRange([lineAboveReturn, lineAboveReturn], toInsert)
-      // fixer.replaceText(filteredRefs[0].identifier.parent.parent.parent.parent.parent, `${name}={${nameOfConst}}`)
-      // return null
-      // console.log(toInsert)
-      // alreadyFixedJsx = true
-// @ts-ignore
-      // const identifier = filteredRefs[0].identifier.parent.parent.parent.parent.parent
-      // console.log(identifier)
+      const toInsert = `const ${nameOfConst} = useMemo(() => ${replacedParens}, [])\n\n`
+
+      const importText = 'import { useMemo } from \'react\'\n'
       // @ts-ignore
       return [
+        importIndex && !alreadyImportedUseMemo ? fixer.insertTextAfterRange([importIndex, importIndex], importText) : null,
         fixer.insertTextAfterRange([lineAboveReturn, lineAboveReturn], toInsert),
         fixer.replaceText(node, `${name}={${nameOfConst}}`),
       ].filter(i => i)
     }
 
-    const useCallbackFix = (fixer: Rule.RuleFixer): Rule.Fix | null => {
-      let fixedCode = ''
+    const useCallbackFix = (fixer: Rule.RuleFixer, node: Rule.Node, alreadyImportedUseCallback: boolean): Rule.Fix | null => {
       const sourceCode = context.getSourceCode();
-      const references = context.getScope()?.references
-      const filteredRefs = references?.filter((reference) => reference?.writeExpr)
+      const importIndex = getIndexToInsertImport(sourceCode)
       // @ts-ignore
-      const definition = filteredRefs?.[0]?.writeExpr?.parent
-      if (!definition) return null
-      const [name, value] = sourceCode.getText(definition).split(/=(.+)/)
-      if(isArrowFn(value)){
-        fixedCode = `${name.trim()} = useCallback(${value.trim()}, [])`
-      } else {
-        fixedCode = `${name.trim()} = useCallback(${value.replace(`function ${name.trim()}`, 'function').trim()}, [])`
-      }
-      return fixer.replaceText(definition, fixedCode)
+      const block = context.getScope().block.body.body
+      if (!block) return null
+      const returnLine = block[block.length - 1].loc.start.line
+      const lineAboveReturn = sourceCode.getIndexFromLoc({ line: returnLine, column: 0 })
+
+      const nodeText = sourceCode.getText(node)
+
+      const value = nodeText.replace(/^\w*=/, '')
+      // @ts-ignore
+      const name = nodeText.match(/^\w*/)[0]
+
+      const match = name.match(BASE_COUNT_PATTERN) || []
+      const base = match[1] || ''
+      const suffix = varNames[base]
+      varNames[base] = (suffix || 0) + 1
+      // @ts-ignore
+      const nameOfConst = `${name}${suffix ? suffix + 1 : ''}`
+
+      const replacedParens = value.replace(/^{/, '(').replace(/\}$/, '')
+      const toInsert = `const ${nameOfConst} = useCallback${replacedParens}, [])\n\n`
+      const importText = 'import { useCallback } from \'react\'\n'
+      // @ts-ignore
+      return [
+        importIndex && !alreadyImportedUseCallback ? fixer.insertTextAfterRange([importIndex, importIndex], importText) : null,
+        fixer.insertTextAfterRange([lineAboveReturn, lineAboveReturn], toInsert),
+        fixer.replaceText(node, `${name}={${nameOfConst}}`),
+      ].filter(i => i)
     }
 
     return {
+      ImportDeclaration (node) {
+        if (alreadyImportedUseMemo && alreadyImportedUseCallback) return
+
+        if (node.source.value === 'react') {
+          const specifiers = node.specifiers
+          for (let i = 0, l = specifiers.length; i < l && !alreadyImportedUseMemo; i++) {
+            // @ts-ignore
+            const name = specifiers[i]?.imported?.name
+            if (name === 'useMemo') alreadyImportedUseMemo = true
+            if (name === 'useCallback') alreadyImportedUseCallback = true
+          }
+        }
+      },
       JSXAttribute: (node: Rule.Node & Rule.NodeParentExtension) => {
         const { parent, value } = (node as unknown) as TSESTree.JSXAttribute &
           Rule.NodeParentExtension;
@@ -201,9 +217,9 @@ const rule: Rule.RuleModule = {
               // case MemoStatus.UnmemoizedNew:
               //   context.report({ node, messageId: "instance-usememo-props", fix: (fixer) => useMemoFix(fixer) });
               //   break;
-              // case MemoStatus.UnmemoizedFunction:
-              //   context.report({ node, messageId: "function-usecallback-props", fix: useCallbackFix });
-              //   break;
+              case MemoStatus.UnmemoizedFunction:
+                context.report({ node, messageId: "function-usecallback-props", fix: (fixer) => useCallbackFix(fixer, node, alreadyImportedUseCallback) });
+                break;
               // case MemoStatus.UnmemoizedFunctionCall:
               // case MemoStatus.UnmemoizedOther:
               //   if (context.options?.[0]?.strict) {
@@ -211,8 +227,7 @@ const rule: Rule.RuleModule = {
               //   }
               //   break;
               case MemoStatus.UnmemoizedJSX:
-                // console.log('sup', node)
-                context.report({ node, messageId: "jsx-usememo-props", fix: (fixer) => useMemoJsxFix(fixer, node) });
+                context.report({ node, messageId: "jsx-usememo-props", fix: (fixer) => useMemoJsxFix(fixer, node, alreadyImportedUseMemo) });
                 break;
             }
           }
@@ -267,7 +282,7 @@ const rule: Rule.RuleModule = {
         const varName = node.id?.name
         // console.log('varName', varName)
         // const [_full, base, count] = varName.match(BASE_COUNT_PATTERN) || []
-        const match = varName.match(BASE_COUNT_PATTERN)
+        const match = varName?.match(BASE_COUNT_PATTERN)
         if (!match) return
         const base = match[1]
         const count = parseInt(match[2] || 1)
