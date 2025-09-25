@@ -61,7 +61,7 @@ export function getExpressionMemoStatus(
   context: Rule.RuleContext,
   expression: TSESTree.Expression
 ): MemoStatus {
-  switch (expression.type) {
+  switch (expression?.type) {
     case "ObjectExpression":
       return MemoStatus.UnmemoizedObject;
     case "ArrayExpression":
