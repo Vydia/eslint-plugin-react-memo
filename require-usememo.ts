@@ -1,4 +1,4 @@
-import { Rule } from "eslint";
+import { Rule, SourceCode } from "eslint";
 import * as ESTree from "estree";
 import { TSESTree } from "@typescript-eslint/types";
 import { Node } from "@typescript-eslint/types/dist/ast-spec"
@@ -80,7 +80,7 @@ const rule: Rule.RuleModule = {
     let alreadyImportedUseMemo: boolean = false
     let alreadyImportedUseCallback: boolean = false
 
-    const getIndexToInsertImport = (sourceCode) => {
+    const getIndexToInsertImport = (sourceCode: SourceCode) => {
       const allComments = sourceCode.getAllComments()
       let insertImportLoc = 1
       for (let i = 0, l = allComments.length; i < l; i++) {
